@@ -103,15 +103,6 @@ npx wrangler deploy
 
 Change `name` in `wrangler.jsonc` first, so the Worker gets its own URL.
 
-## Develop
-
-```sh
-npm install
-npm test
-```
-
-The offline tests replace `fetch` with answers shaped like Blizzard's. The live test runs only when `BLIZZARD_CLIENT_ID` and `BLIZZARD_CLIENT_SECRET` are set. Try the tools by hand with `npx @modelcontextprotocol/inspector node src/index.js`.
-
 ## How it behaves
 
 - Fetches only `oauth.battle.net` and `{region}.api.blizzard.com`, and only reads.
@@ -125,5 +116,14 @@ The offline tests replace `fetch` with answers shaped like Blizzard's. The live 
 - Only public profiles exist. Blizzard answers 404 for a character that is not on that realm or whose profile is not public.
 - Realm slugs mostly follow Blizzard's rule of lowercase with hyphens and no apostrophes. Exceptions, like `azjolnerub` for Azjol-Nerub, are resolved through the realm list after a miss.
 - Blizzard's Developer API Terms of Use apply, which you accept when creating the client.
+
+## Develop
+
+```sh
+npm install
+npm test
+```
+
+The offline tests replace `fetch` with answers shaped like Blizzard's. The live test runs only when `BLIZZARD_CLIENT_ID` and `BLIZZARD_CLIENT_SECRET` are set. Try the tools by hand with `npx @modelcontextprotocol/inspector node src/index.js`.
 
 World of Warcraft is a trademark of Blizzard Entertainment. This project is not affiliated with or endorsed by Blizzard.
