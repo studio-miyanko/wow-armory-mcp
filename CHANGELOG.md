@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.1.0 (2026-10-11)
+
+- Hosted endpoint at `https://wow-armory-mcp.marco-vrinssen.workers.dev/mcp`, so agents and bots connect over Streamable HTTP without a Blizzard client of their own. 30 requests a minute per IP.
+- `src/worker.js` serves the same tools on Cloudflare Workers, for anyone who wants their own copy.
+
 ## 1.0.0 (2026-10-11)
 
 - First release. `character` reads a character's profile, stats, gear and spec from Blizzard's official Profile API, and finds it on any realm of its connected realm. `realm` finds realms and their clusters.

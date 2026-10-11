@@ -9,6 +9,7 @@
 - Namespaces per flavor live in `FLAVORS` in `src/blizzard.js`, taken from FuzzyStatic/blizzard `blizzard.go`. Response shapes follow the strict zod schemas in Pewtro/blizzard-api `generated/schemas`, which its integration tests validate against the live API. The developer portal docs are a JavaScript app that WebFetch cannot read, so read those repos with `gh api`.
 - WoW Forever gets a `forever` flavor once Blizzard publishes its namespace, with `realm` as the ruleset and `name` as the two-part name. Never guess the namespace before that.
 - Tool output stays plain text and leaves out nulls, empty values and zero stats.
+- The hosted endpoint `https://wow-armory-mcp.marco-vrinssen.workers.dev/mcp` (since 2026-10-11) is the Worker `wow-armory-mcp` on the Workers Free plan, deployed by hand from `src/worker.js`. It uses the user's Battle.net client "WoW Armory MCP" through the Worker secrets `BLIZZARD_CLIENT_ID` and `BLIZZARD_CLIENT_SECRET`, which `nodejs_compat` puts into `process.env`. It is open to anyone, with a per-IP limit of 30 requests a minute from the `LIMITER` binding, because every call shares the account's free daily Worker requests.
 - MCP users run `github:studio-miyanko/wow-armory-mcp#semver:^1`, which follows the newest 1.x tag. A breaking tool change needs a major version and the README updated to the new range.
 
 ## Checks
@@ -23,3 +24,4 @@
 2. Run `npm test` with credentials set, so the live test runs too.
 3. Push to `main`.
 4. Tag `vX.Y.Z` and create a GitHub release. `#semver:^1` resolves tags, so untagged commits never reach users.
+5. Run `npx wrangler deploy`, so the hosted endpoint serves the same release.

@@ -1,6 +1,6 @@
 # WoW Armory MCP
 
-Lets Claude look up World of Warcraft characters through Blizzard's official Profile API: level, spec, guild, item level, stats and gear, for Retail and the Classic flavors. It is a local, read-only MCP server that needs a free Blizzard API client.
+Lets Claude look up World of Warcraft characters through Blizzard's official Profile API: level, spec, guild, item level, stats and gear, for Retail and the Classic flavors. It is a read-only MCP server: connect to the hosted endpoint with no setup, or run it yourself with a free Blizzard API client.
 
 Unofficial and not affiliated with Blizzard Entertainment.
 
@@ -27,7 +27,23 @@ Unofficial and not affiliated with Blizzard Entertainment.
 
 WoW Forever gets a `forever` flavor once Blizzard publishes its namespace, with `realm` as the ruleset and `name` as the two-part name.
 
+## Hosted endpoint
+
+Connect any MCP client to this URL over Streamable HTTP. It needs no account, key or Blizzard client:
+
+```
+https://wow-armory-mcp.marco-vrinssen.workers.dev/mcp
+```
+
+- Claude Code: `claude mcp add --scope user --transport http wow-armory https://wow-armory-mcp.marco-vrinssen.workers.dev/mcp`
+- Claude app and claude.ai: Settings, Connectors, Add custom connector, then paste the URL.
+- Other agents and bots: point their MCP client at the URL, or call it from code with the MCP SDK's Streamable HTTP client.
+
+It runs on free plans, so each IP gets 30 requests a minute, and it can be down for the rest of the day once the free daily quota is used up. For heavy use, run your own copy as below.
+
 ## Set up credentials
+
+To run the server yourself, locally or as your own Worker:
 
 1. Sign in at https://develop.battle.net/access/clients and create a client. It is free.
 2. Copy its client id and client secret.
@@ -73,6 +89,19 @@ In Settings, Developer, Edit Config, add the server and restart the app. Leave o
 ```
 
 Then ask something like "stats and gear of my mage on Draenor EU".
+
+### Your own Worker
+
+`src/worker.js` serves the same tools at `/mcp` on Cloudflare Workers, with a per-IP rate limit:
+
+```sh
+npm install
+npx wrangler secret put BLIZZARD_CLIENT_ID
+npx wrangler secret put BLIZZARD_CLIENT_SECRET
+npx wrangler deploy
+```
+
+Change `name` in `wrangler.jsonc` first, so the Worker gets its own URL.
 
 ## Develop
 

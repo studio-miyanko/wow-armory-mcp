@@ -82,7 +82,7 @@ test('one token serves parallel calls and is renewed once it expires', async (t)
     assert.equal(login.init.method, 'POST');
     assert.equal(login.init.headers.authorization, `Basic ${Buffer.from('test-client-id:test-client-secret').toString('base64')}`);
     assert.equal(String(login.init.body), 'grant_type=client_credentials');
-    assert.match(login.init.headers['user-agent'], /^wow-armory-mcp\/1\.0\.0 \(\+https:\/\/github\.com\/studio-miyanko\/wow-armory-mcp\)$/);
+    assert.match(login.init.headers['user-agent'], /^wow-armory-mcp\/\d+\.\d+\.\d+ \(\+https:\/\/github\.com\/studio-miyanko\/wow-armory-mcp\)$/);
 
     const requests = apiCalls(calls);
     assert.deepEqual(requests.map((call) => call.url.searchParams.get('namespace')).sort(), ['dynamic-classic1x-eu', 'dynamic-eu', 'dynamic-us']);
