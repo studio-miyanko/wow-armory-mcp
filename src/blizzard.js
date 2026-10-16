@@ -12,7 +12,7 @@ const CHARACTER_MS = 10 * 60 * 1000;
 const REALMS_MS = 24 * 60 * 60 * 1000;
 const CACHE_SIZE = 300;
 const RETRY_STATUS = new Set([429, 500, 502, 503, 504]);
-const SECTIONS = { statistics: 'Statistics', equipment: 'Equipment', specializations: 'Specializations' };
+const SECTIONS = { statistics: 'Statistics', equipment: 'Equipment', specializations: 'Specializations', 'character-media': 'Portrait' };
 
 const cache = new Map();
 
@@ -25,6 +25,14 @@ class ApiError extends Error {
 
 export function namespace(kind, flavor, region) {
   return [kind, FLAVORS[flavor], region].filter(Boolean).join('-');
+}
+
+// The armory calls Retail "worldsoul" and each Classic flavor by its namespace infix, and redirects to the viewer's language.
+// A missing character gets an error page there, so only a character the API found gets a link, built from the API's own slug and name.
+export function armoryUrl({ region, flavor }, summary) {
+  if (!summary.realm?.slug || !summary.name) return null;
+  const game = FLAVORS[flavor] ?? 'worldsoul';
+  return `https://worldofwarcraft.blizzard.com/${game}/${region}/armory/character/${encodeURIComponent(summary.realm.slug)}/${encodeURIComponent(summary.name.toLowerCase())}`;
 }
 
 // Blizzard's rule: lowercase, apostrophes and parentheses dropped, spaces to hyphens, so slugs pass through unchanged.

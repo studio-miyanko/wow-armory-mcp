@@ -3,7 +3,7 @@ import { spawn } from 'node:child_process';
 import { beforeEach, test } from 'node:test';
 
 import { SETUP } from '../src/auth.js';
-import { FLAVORS, clearCaches, findCharacter, namespace, searchRealms, toSlug } from '../src/blizzard.js';
+import { FLAVORS, armoryUrl, clearCaches, findCharacter, namespace, searchRealms, toSlug } from '../src/blizzard.js';
 import { formatCharacter, formatClusters, stripCodes } from '../src/format.js';
 import * as fixtures from './fixtures.js';
 
@@ -69,6 +69,18 @@ test('realm slugs follow Blizzard\'s rules and namespaces follow the flavor', ()
     ['dynamic-us', 'dynamic-classic-us', 'dynamic-classic1x-us', 'dynamic-classicann-us']);
 });
 
+test('armory links name the game like the armory does and encode realm and name', () => {
+  const character = { name: 'Bananía', realm: { slug: 'la-croisade-écarlate' } };
+  const games = Object.fromEntries(Object.keys(FLAVORS).map((flavor) => [flavor, armoryUrl({ region: 'eu', flavor }, character)]));
+  assert.deepEqual(games, {
+    retail: 'https://worldofwarcraft.blizzard.com/worldsoul/eu/armory/character/la-croisade-%C3%A9carlate/banan%C3%ADa',
+    classic: 'https://worldofwarcraft.blizzard.com/classic/eu/armory/character/la-croisade-%C3%A9carlate/banan%C3%ADa',
+    era: 'https://worldofwarcraft.blizzard.com/classic1x/eu/armory/character/la-croisade-%C3%A9carlate/banan%C3%ADa',
+    anniversary: 'https://worldofwarcraft.blizzard.com/classicann/eu/armory/character/la-croisade-%C3%A9carlate/banan%C3%ADa',
+  });
+  assert.equal(armoryUrl({ region: 'eu', flavor: 'retail' }, { name: 'Bananía' }), null);
+});
+
 test('one token serves parallel calls and is renewed once it expires', async (t) => {
   t.mock.timers.enable({ apis: ['Date'], now: Date.now() });
   await withFetch(blizzard(realmPaths, ['token-1', 'token-2']), async (calls) => {
@@ -121,6 +133,8 @@ test('a retail profile becomes compact text with stats and items', async () => {
       'Realm: Draenor (eu, retail)',
       'Last login: 2026-10-10 18:22 UTC',
       'Item level: 642 average, 639 equipped',
+      'Armory: https://worldofwarcraft.blizzard.com/worldsoul/eu/armory/character/draenor/zuljaro',
+      'Portrait: https://render.worldofwarcraft.com/eu/character/draenor/14/70112334-avatar.jpg',
     ].join('\n'));
     assert.match(text, /\n\nStats\nHealth: 8,412,340\nMana: 250,000\nStrength: 1,802\nAgility: 41,208\nIntellect: 2,401\nStamina: 420,617\nArmor: 31,220\n/);
     assert.match(text, /\nAttack power: 43,270\nSpell power: 23,400\n/);
@@ -147,6 +161,10 @@ test('a Classic Era Hardcore profile shows talent points, spirit and defense', a
       'Self-found: yes',
       'Last login: 2026-10-09 20:05 UTC',
       'Item level: 61 average, 60 equipped',
+
+      // Built from the API's slug and name, not from the input "Nek'Rosh" and "PIPWICK".
+      'Armory: https://worldofwarcraft.blizzard.com/classic1x/eu/armory/character/nekrosh/pipwick',
+      'Portrait: https://render.worldofwarcraft.com/classic1x-eu/character/nekrosh/43/88201771-avatar.jpg',
     ].join('\n'));
     assert.match(text, /\nIntellect: 290\nStamina: 210\nSpirit: 168\nArmor: 1,380\nDefense: 300\nAttack power: 24\nSpell power: 512\n/);
     assert.match(text, /\nCrit: melee 4\.8%, ranged 4\.8%, spell 9\.15%\nDodge: 3\.9%\n/);
@@ -156,13 +174,16 @@ test('a Classic Era Hardcore profile shows talent points, spirit and defense', a
 });
 
 test('a missing section keeps the rest of the profile and says so', async () => {
-  const { statistics, ...rest } = fixtures.eraProfile;
+  const { statistics, media, ...rest } = fixtures.eraProfile;
   const paths = fixtures.profilePaths('nekrosh', 'pipwick', rest);
   await withFetch(blizzard(paths), async (calls) => {
     const input = { region: 'eu', realm: 'nekrosh', name: 'Pipwick', flavor: 'anniversary' };
     const text = formatCharacter(await findCharacter(input), input);
     for (const { url } of apiCalls(calls)) assert.equal(url.searchParams.get('namespace'), 'profile-classicann-eu');
     assert.match(text, /\nNote: Statistics could not be loaded: Blizzard has nothing at \/profile\/wow\/character\/nekrosh\/pipwick\/statistics in profile-classicann-eu\./);
+    assert.match(text, /\nArmory: https:\/\/worldofwarcraft\.blizzard\.com\/classicann\/eu\/armory\/character\/nekrosh\/pipwick\n/);
+    assert.match(text, /\nNote: Portrait could not be loaded: /);
+    assert.doesNotMatch(text, /\nPortrait: /);
     assert.doesNotMatch(text, /\n\nStats\n/);
     assert.match(text, /\n\nEquipment\n- Head: Netherwind Crown/);
   });

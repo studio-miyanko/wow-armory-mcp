@@ -197,18 +197,31 @@ export const retailSpecializations = {
   character: zuljaro,
 };
 
-// Builds the four profile paths of one character, so a test can place it on any realm.
-export function profilePaths(slug, name, { summary, statistics, equipment, specializations }) {
+// The API lists only avatar and main-raw renders, on a host per flavor.
+export const retailMedia = {
+  _links: { self: key('/profile/wow/character/draenor/zuljaro/character-media') },
+  character: zuljaro,
+  assets: [
+    { key: 'avatar', value: 'https://render.worldofwarcraft.com/eu/character/draenor/14/70112334-avatar.jpg' },
+    { key: 'main-raw', value: 'https://render.worldofwarcraft.com/eu/character/draenor/14/70112334-main-raw.png' },
+  ],
+};
+
+// Builds the five profile paths of one character, so a test can place it on any realm.
+export function profilePaths(slug, name, { summary, statistics, equipment, specializations, media }) {
   const base = `/profile/wow/character/${slug}/${name}`;
   return Object.fromEntries([
     [base, summary],
     [`${base}/statistics`, statistics],
     [`${base}/equipment`, equipment],
     [`${base}/specializations`, specializations],
+    [`${base}/character-media`, media],
   ].filter(([, body]) => body));
 }
 
-export const retailProfile = { summary: retailSummary, statistics: retailStatistics, equipment: retailEquipment, specializations: retailSpecializations };
+export const retailProfile = {
+  summary: retailSummary, statistics: retailStatistics, equipment: retailEquipment, specializations: retailSpecializations, media: retailMedia,
+};
 
 const nekrosh = realmRef('Nek\'Rosh', 5_826, 'nekrosh');
 const pipwick = characterRef('Pipwick', 88_201_771, nekrosh);
@@ -299,4 +312,13 @@ export const eraSpecializations = {
   character: pipwick,
 };
 
-export const eraProfile = { summary: eraSummary, statistics: eraStatistics, equipment: eraEquipment, specializations: eraSpecializations };
+export const eraMedia = {
+  _links: { self: key('/profile/wow/character/nekrosh/pipwick/character-media') },
+  character: pipwick,
+  assets: [
+    { key: 'avatar', value: 'https://render.worldofwarcraft.com/classic1x-eu/character/nekrosh/43/88201771-avatar.jpg' },
+    { key: 'main-raw', value: 'https://render.worldofwarcraft.com/classic1x-eu/character/nekrosh/43/88201771-main-raw.png' },
+  ],
+};
+
+export const eraProfile = { summary: eraSummary, statistics: eraStatistics, equipment: eraEquipment, specializations: eraSpecializations, media: eraMedia };

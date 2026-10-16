@@ -28,9 +28,13 @@ export default {
     if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: CORS });
     if (pathname !== '/mcp') return new Response(INFO, { status: pathname === '/' ? 200 : 404 });
 
-    // Every caller shares the account's free Worker requests and the Blizzard client, so each IP gets a fair share.
-    const { success } = await env.LIMITER.limit({ key: request.headers.get('cf-connecting-ip') ?? 'unknown' });
-    if (!success) return withCors(new Response('Too many requests. Try again in a minute.', { status: 429, headers: { 'retry-after': '60' } }));
+    // Internet callers share the account's free Worker requests and the Blizzard client, so each IP gets a fair share.
+    // Calls through a service binding come from the owner's own Workers and carry no client IP, so they skip the limit.
+    const ip = request.headers.get('cf-connecting-ip');
+    if (ip) {
+      const { success } = await env.LIMITER.limit({ key: ip });
+      if (!success) return withCors(new Response('Too many requests. Try again in a minute.', { status: 429, headers: { 'retry-after': '60' } }));
+    }
     return withCors(await handler.fetch(request));
   },
 };

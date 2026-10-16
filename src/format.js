@@ -1,3 +1,5 @@
+import { armoryUrl } from './blizzard.js';
+
 // Answers are plain text to keep the model's context small, and empty or zero values are left out.
 
 const integer = new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 });
@@ -66,6 +68,13 @@ function headerLines(summary, specs, { region, flavor }) {
     summary.last_login_timestamp > 0 && `Last login: ${loginTime(summary.last_login_timestamp)}`,
     itemLevelLine(summary),
   ];
+}
+
+// Both are printed, never fetched. The avatar is the only portrait the API lists for every flavor.
+function linkLines(summary, media, context) {
+  const armory = armoryUrl(context, summary);
+  const portrait = media?.assets?.find((asset) => asset.key === 'avatar')?.value;
+  return [armory && `Armory: ${armory}`, portrait && `Portrait: ${portrait}`];
 }
 
 // Blizzard renamed rating to rating_normalized, so both are read.
@@ -142,11 +151,16 @@ function itemLine(item) {
   return `- ${item.slot?.name ?? item.slot?.type}: ${item.name}${details.length ? `, ${details.join(', ')}` : ''}`;
 }
 
-export function formatCharacter({ summary, statistics, equipment, specializations, warnings = [], notes = [] }, context) {
+export function formatCharacter({ summary, statistics, equipment, specializations, 'character-media': media, warnings = [], notes = [] }, context) {
   const stats = statLines(statistics);
   const items = (equipment?.equipped_items ?? []).filter((item) => item.name).map(itemLine);
   return [
-    block(headerLines(summary, specializations, context), notes.map((note) => `Note: ${note}`), warnings.map((warning) => `Note: ${warning}`)),
+    block(
+      headerLines(summary, specializations, context),
+      linkLines(summary, media, context),
+      notes.map((note) => `Note: ${note}`),
+      warnings.map((warning) => `Note: ${warning}`),
+    ),
     stats.length && block('Stats', stats),
     items.length && block('Equipment', items),
   ].filter(Boolean).join('\n\n');

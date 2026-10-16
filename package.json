@@ -1,6 +1,6 @@
 {
   "name": "wow-armory-mcp",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "private": true,
   "description": "Read-only MCP server that looks up World of Warcraft characters and realms through Blizzard's official Profile API, for Retail and Classic.",
   "license": "MIT",

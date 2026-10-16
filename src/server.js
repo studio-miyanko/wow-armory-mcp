@@ -27,7 +27,8 @@ export function createServer() {
     title: 'WoW character',
     description: 'Look up a World of Warcraft character on Blizzard\'s official armory: level, race, class, spec, faction, guild, '
       + 'last login, item level, health, power, primary and secondary stats with ratings and percentages, and every equipped item '
-      + 'with item level, quality and enchant. Works for Retail and the Classic flavors. Any realm of a connected realm finds the character. '
+      + 'with item level, quality and enchant, plus a link to the official armory page and a portrait image. '
+      + 'Works for Retail and the Classic flavors. Any realm of a connected realm finds the character. '
       + 'Only public profiles exist. WoW Forever is not supported yet.',
     inputSchema: z.object({
       region,
